@@ -1,4 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
+import time
 
 class Window:
     def __init__(self, width, height):
@@ -93,17 +94,63 @@ class Cell:
         line = Line(self_center_point, dest_cell_center_point)
         line.draw(self.__win.canvas, color)
 
+class Maze:
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, window):
+        self.x1 = x1
+        self.y1 = y1
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        self.cell_size_x = cell_size_x
+        self.cell_size_y = cell_size_y
+        self.__win = window
+
+        self.__create_cells()
+
+    def __create_cells(self):
+        self.__cells = []
+        first_cell_x = self.x1
+        first_cell_y = self.y1
+
+        for row in range(0, self.num_rows):
+            for col in range(0, self.num_cols):
+                top_left_x = first_cell_x + (col * self.cell_size_x)
+                top_left_y = first_cell_y + (row * self.cell_size_y)
+
+                bottom_right_x = top_left_x + self.cell_size_x
+                bottom_right_y = top_left_y + self.cell_size_y
+
+                if col == 0:
+                    self.__cells.append([Cell(top_left_x, bottom_right_x, top_left_y, bottom_right_y, self.__win)])
+                else:
+                    self.__cells[row].append(Cell(top_left_x, bottom_right_x, top_left_y, bottom_right_y, self.__win))
+        
+        for col in self.__cells:
+            for col_cell in col:
+                col_cell.draw()
+                self.__animate()
+                
+            
+
+    #def __draw_cell(self, i, j):
+
+    
+    def __animate(self):
+        self.__win.redraw()
+        time.sleep(0.05)
+        
 
 def main():
     win = Window(800, 600)
 
-    cell_first = Cell(100,200, 300, 400, win)
-    cell_second = Cell(300,400, 300, 400, win)
+    # cell_first = Cell(100,200, 300, 400, win)
+    # cell_second = Cell(300,400, 300, 400, win)
 
-    cell_first.draw()
-    cell_second.draw()
+    # cell_first.draw()
+    # cell_second.draw()
 
-    cell_first.draw_move(cell_second)
+    # cell_first.draw_move(cell_second, True)
+
+    maze = Maze(x1=100, y1=200, num_rows=10, num_cols=10, cell_size_x=20, cell_size_y=20, window=win)
 
     win.wait_for_close()
 
