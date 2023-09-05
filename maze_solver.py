@@ -45,11 +45,11 @@ class Line:
         canvas.pack()
 
 class Cell:
-    def __init__(self, x1, x2, y1, y2, window=None):
-        self.has_left_wall = True
-        self.has_right_wall = True
-        self.has_top_wall = True
-        self.has_bottom_wall = True
+    def __init__(self, x1, x2, y1, y2, window=None, has_left_wall = True, has_right_wall = True, has_top_wall = True, has_bottom_wall = True):
+        self.has_left_wall = has_left_wall
+        self.has_right_wall = has_right_wall
+        self.has_top_wall = has_top_wall
+        self.has_bottom_wall = has_bottom_wall
         
         self.__x1_top_left = x1
         self.__y1_top_left = y1
@@ -125,13 +125,16 @@ class Maze:
                     self.__cells.append([Cell(top_left_x, bottom_right_x, top_left_y, bottom_right_y, self.__win)])
                 else:
                     self.__cells[row].append(Cell(top_left_x, bottom_right_x, top_left_y, bottom_right_y, self.__win))
+
+        for i, row in enumerate(self.__cells):
+            for j, col in enumerate(self.__cells[i]):
+                self.__draw_cell(i, j)
         
-        for col in self.__cells:
-            for col_cell in col:
-                col_cell.draw()
-                self.__animate()
-
-
+        
+    def __draw_cell(self, i , j):
+        self.__cells[i][j].draw()
+        self.__animate()
+        
     def get_cells(self):
         return self.__cells
 
@@ -141,6 +144,15 @@ class Maze:
             self.__win.redraw()
             time.sleep(0.05)
         
+
+    def __break_entrance_and_exit(self):
+
+        cells = self.get_cells()
+
+        top_left_cell = cells[0][0]
+        bottom_right_cell = cells[-1][-1]
+
+        top_left_cell.draw_cell()
 
 def main():
     win = Window(800, 600)
@@ -153,7 +165,7 @@ def main():
 
     # cell_first.draw_move(cell_second, True)
 
-    maze = Maze(x1=100, y1=200, num_rows=10, num_cols=10, cell_size_x=50, cell_size_y=30, window=win)
+    maze = Maze(x1=100, y1=200, num_rows=3, num_cols=3, cell_size_x=50, cell_size_y=50, window=win)
 
     win.wait_for_close()
 
