@@ -45,7 +45,7 @@ class Line:
         canvas.pack()
 
 class Cell:
-    def __init__(self, x1, x2, y1, y2, window):
+    def __init__(self, x1, x2, y1, y2, window=None):
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
@@ -59,26 +59,28 @@ class Cell:
         self.__win = window 
 
     def draw(self):
+
         top_left_point = Point(self.__x1_top_left, self.__y1_top_left)
         bottom_left_point = Point(self.__x1_top_left, self.__y2_bottom_right)
         top_right_point = Point(self.__x2_bottom_right, self.__y1_top_left)
         bottom_right_point = Point(self.__x2_bottom_right, self.__y2_bottom_right)
 
-        if self.has_left_wall:
-            left_wall = Line(top_left_point, bottom_left_point)
-            self.__win.draw_line(left_wall, "red")
+        if(self.__win):
+            if self.has_left_wall:
+                left_wall = Line(top_left_point, bottom_left_point)
+                self.__win.draw_line(left_wall, "red")
 
-        if self.has_right_wall:
-            right_wall = Line(top_right_point, bottom_right_point)
-            self.__win.draw_line(right_wall, "red")
+            if self.has_right_wall:
+                right_wall = Line(top_right_point, bottom_right_point)
+                self.__win.draw_line(right_wall, "red")
 
-        if self.has_top_wall:
-            top_wall = Line(top_left_point, top_right_point)
-            self.__win.draw_line(top_wall, "red")
+            if self.has_top_wall:
+                top_wall = Line(top_left_point, top_right_point)
+                self.__win.draw_line(top_wall, "red")
 
-        if self.has_bottom_wall:
-            bottom_wall = Line(bottom_left_point, bottom_right_point)
-            self.__win.draw_line(bottom_wall, "red")
+            if self.has_bottom_wall:
+                bottom_wall = Line(bottom_left_point, bottom_right_point)
+                self.__win.draw_line(bottom_wall, "red")
     
     def draw_move(self, to_cell, undo=False):
         self_center_x = (self.__x1_top_left + self.__x2_bottom_right) / 2
@@ -95,7 +97,7 @@ class Cell:
         line.draw(self.__win.canvas, color)
 
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, window):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, window=None):
         self.x1 = x1
         self.y1 = y1
         self.num_rows = num_rows
@@ -128,15 +130,16 @@ class Maze:
             for col_cell in col:
                 col_cell.draw()
                 self.__animate()
-                
-            
 
-    #def __draw_cell(self, i, j):
+
+    def get_cells(self):
+        return self.__cells
 
     
     def __animate(self):
-        self.__win.redraw()
-        time.sleep(0.05)
+        if(self.__win):
+            self.__win.redraw()
+            time.sleep(0.05)
         
 
 def main():
@@ -150,8 +153,9 @@ def main():
 
     # cell_first.draw_move(cell_second, True)
 
-    maze = Maze(x1=100, y1=200, num_rows=10, num_cols=10, cell_size_x=20, cell_size_y=20, window=win)
+    maze = Maze(x1=100, y1=200, num_rows=10, num_cols=10, cell_size_x=50, cell_size_y=30, window=win)
 
     win.wait_for_close()
 
-main()
+if __name__ == "__main__":
+    main()
