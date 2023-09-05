@@ -66,21 +66,30 @@ class Cell:
         bottom_right_point = Point(self.__x2_bottom_right, self.__y2_bottom_right)
 
         if(self.__win):
+            left_wall = Line(top_left_point, bottom_left_point)
+            right_wall = Line(top_right_point, bottom_right_point)
+            top_wall = Line(top_left_point, top_right_point)
+            bottom_wall = Line(bottom_left_point, bottom_right_point)
+
             if self.has_left_wall:
-                left_wall = Line(top_left_point, bottom_left_point)
                 self.__win.draw_line(left_wall, "red")
+            else:
+                self.__win.draw_line(left_wall, "white")
 
             if self.has_right_wall:
-                right_wall = Line(top_right_point, bottom_right_point)
                 self.__win.draw_line(right_wall, "red")
+            else:
+                self.__win.draw_line(right_wall, "white")
 
             if self.has_top_wall:
-                top_wall = Line(top_left_point, top_right_point)
                 self.__win.draw_line(top_wall, "red")
+            else:
+                self.__win.draw_line(top_wall, "white")
 
             if self.has_bottom_wall:
-                bottom_wall = Line(bottom_left_point, bottom_right_point)
                 self.__win.draw_line(bottom_wall, "red")
+            else:
+                self.__win.draw_line(bottom_wall, "white")
     
     def draw_move(self, to_cell, undo=False):
         self_center_x = (self.__x1_top_left + self.__x2_bottom_right) / 2
@@ -129,6 +138,8 @@ class Maze:
         for i, row in enumerate(self.__cells):
             for j, col in enumerate(self.__cells[i]):
                 self.__draw_cell(i, j)
+
+        self.__break_entrance_and_exit()
         
         
     def __draw_cell(self, i , j):
@@ -149,10 +160,11 @@ class Maze:
 
         cells = self.get_cells()
 
-        top_left_cell = cells[0][0]
-        bottom_right_cell = cells[-1][-1]
+        self.__cells[0][0].has_top_wall = False
+        self.__cells[-1][-1].has_bottom_wall = False
 
-        top_left_cell.draw_cell()
+        self.__draw_cell(0,0)
+        self.__draw_cell(-1,-1)
 
 def main():
     win = Window(800, 600)
