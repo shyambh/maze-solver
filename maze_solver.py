@@ -1,5 +1,6 @@
 from tkinter import Tk, BOTH, Canvas
 import time
+import random
 
 class Window:
     def __init__(self, width, height):
@@ -45,7 +46,8 @@ class Line:
         canvas.pack()
 
 class Cell:
-    def __init__(self, x1, x2, y1, y2, window=None, has_left_wall = True, has_right_wall = True, has_top_wall = True, has_bottom_wall = True):
+    def __init__(self, x1, x2, y1, y2, window=None, has_left_wall = True, has_right_wall = True, has_top_wall = True, has_bottom_wall = True, visited=False):
+
         self.has_left_wall = has_left_wall
         self.has_right_wall = has_right_wall
         self.has_top_wall = has_top_wall
@@ -57,6 +59,7 @@ class Cell:
         self.__y2_bottom_right = y2
 
         self.__win = window 
+        self.visited = visited
 
     def draw(self):
 
@@ -106,7 +109,11 @@ class Cell:
         line.draw(self.__win.canvas, color)
 
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, window=None):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, window=None, seed=None):
+
+        if seed is not None:
+            random.seed(seed)
+
         self.x1 = x1
         self.y1 = y1
         self.num_rows = num_rows
@@ -140,7 +147,7 @@ class Maze:
                 self.__draw_cell(i, j)
 
         self.__break_entrance_and_exit()
-        
+        self.__break_walls_r(0,0)
         
     def __draw_cell(self, i , j):
         self.__cells[i][j].draw()
@@ -149,12 +156,10 @@ class Maze:
     def get_cells(self):
         return self.__cells
 
-    
     def __animate(self):
         if(self.__win):
             self.__win.redraw()
-            time.sleep(0.05)
-        
+            time.sleep(0.1)
 
     def __break_entrance_and_exit(self):
 
@@ -165,6 +170,65 @@ class Maze:
 
         self.__draw_cell(0,0)
         self.__draw_cell(-1,-1)
+
+    def __break_walls_r(self,i,j):
+
+        # Marking the current cell as visited
+        self.__cells[i][j].visited = True
+
+        while True:
+            row_col_to_visit = []
+
+            # Skip, if a cell is on the border
+            # is_at_edge = i == 0 or i == self.num_rows - 1 or j == 0 or j == self.num_cols - 1 
+
+            is_top_row = i == 0 
+            is_bottom_row = i == self.num_rows - 1
+
+            is_left_col = j == 0 
+            is_right_col = j == self.num_cols - 1
+
+            if(not is_top_row):
+                top_adjacent_cell = self.__cells[i-1][j]
+                if not top_adjacent_cell.visited:
+                    row_col_to_visit.append({"top" : (i-1, j)})
+            
+            if(not is_bottom_row):
+                bottom_adjacent_cell = self.__cells[i+1][j]
+                if not bottom_adjacent_cell.visited:
+                    row_col_to_visit.append({"bottom" : (i+1, j)})
+            
+            if(not is_left_col):
+                left_adjacent_cell = self.__cells[i][j-1]
+                if not left_adjacent_cell.visited:
+                    row_col_to_visit.append({"left" : (i, j-1)})
+            if(not is_right_col):
+                right_adjacent_cell = self.__cells[i][j+1]
+                if not right_adjacent_cell.visited:
+                    row_col_to_visit.append({"right" : (i, j+1)})
+
+            if len(row_col_to_visit) == 0:
+                # if there are no directions left to visit then draw the current cell
+                self.__cells[i][j].draw()
+                return
+
+            # Pick a random adjacent cell to move to
+            random_cell = random.choice(row_col_to_visit)
+            random_direction = list(random_cell.keys())[0]
+            random_cell_i = list(random_cell.values())[0][0] 
+            random_cell_j = list(random_cell.values())[0][1] 
+
+            if random_direction == "top":
+                self.__cells[i][j].has_top_wall = False
+            elif random_direction == "bottom":
+                self.__cells[i][j].has_bottom_wall = False
+            elif random_direction == "left":
+                self.__cells[i][j].has_left_wall = False
+            elif random_direction == "right":
+                self.__cells[i][j].has_right_wall = False
+
+            # Move to the destination cell
+            self.__break_walls_r(random_cell_i, random_cell_j)
 
 def main():
     win = Window(800, 600)
