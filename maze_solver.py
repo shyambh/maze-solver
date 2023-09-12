@@ -148,6 +148,7 @@ class Maze:
 
         self.__break_entrance_and_exit()
         self.__break_walls_r(0,0)
+        self.__reset_cells_visited()
         
     def __draw_cell(self, i , j):
         self.__cells[i][j].draw()
@@ -220,15 +221,96 @@ class Maze:
 
             if random_direction == "top":
                 self.__cells[i][j].has_top_wall = False
+                self.__cells[random_cell_i][random_cell_j].has_bottom_wall = False
+                
             elif random_direction == "bottom":
                 self.__cells[i][j].has_bottom_wall = False
+                self.__cells[random_cell_i][random_cell_j].has_top_wall = False
+
             elif random_direction == "left":
                 self.__cells[i][j].has_left_wall = False
+                self.__cells[random_cell_i][random_cell_j].has_right_wall = False
+
             elif random_direction == "right":
                 self.__cells[i][j].has_right_wall = False
+                self.__cells[random_cell_i][random_cell_j].has_left_wall = False
 
             # Move to the destination cell
             self.__break_walls_r(random_cell_i, random_cell_j)
+
+    def __reset_cells_visited(self):
+        for row in self.get_cells():
+            for col in row:
+                col.visited = False
+
+    def __solve_r(self, i , j):
+
+        self.__animate()
+        cells = self.get_cells()
+
+        # Marking current cell as visited
+        cells[i][j].visited = True
+
+        # Return True if at the end cell (destination)
+        if cells[i][j] == cells[-1][-1]:
+            return True
+
+        # Edge cells
+        is_top_row = i == 0 
+        is_bottom_row = i == self.num_rows - 1
+
+        is_left_col = j == 0 
+        is_right_col = j == self.num_cols - 1
+
+        row_col_to_visit = []
+
+        # Add all possible directions and corresponding cells to the list
+        if(not is_top_row):
+            top_adjacent_cell = self.__cells[i-1][j]
+            if not top_adjacent_cell.visited:
+                row_col_to_visit.append({"top" : (i-1, j)})
+            
+        if(not is_bottom_row):
+            bottom_adjacent_cell = self.__cells[i+1][j]
+            if not bottom_adjacent_cell.visited:
+                row_col_to_visit.append({"bottom" : (i+1, j)})
+        
+        if(not is_left_col):
+            left_adjacent_cell = self.__cells[i][j-1]
+            if not left_adjacent_cell.visited:
+                row_col_to_visit.append({"left" : (i, j-1)})
+        if(not is_right_col):
+            right_adjacent_cell = self.__cells[i][j+1]
+            if not right_adjacent_cell.visited:
+                row_col_to_visit.append({"right" : (i, j+1)})
+
+        for idx, cell_with_direction in enumerate(row_col_to_visit):
+            wall_exists = False
+
+            cell_direction = list(cell_with_direction.keys())[0]
+            destination_cell_i = list(row_col_to_visit[idx].values())[0][0]
+            destination_cell_j = list(row_col_to_visit[idx].values())[0][1]
+            destination_cell = cells[destination_cell_i][destination_cell_j]
+            
+            if cell_direction == 'top':
+                wall_exists = destination_cell.has_bottom_wall
+            elif cell_direction == 'bottom':
+                wall_exists = destination_cell.has_top_wall
+            elif cell_direction == 'left':
+                wall_exists = destination_cell.has_right_wall
+            elif cell_direction == 'right':
+                wall_exists = destination_cell.has_left_wall
+
+            if not wall_exists:
+                cells[i][j].draw_move(destination_cell)
+                if self.__solve_r(destination_cell_i, destination_cell_j):
+                    return True
+                else:
+                    cells[i][j].draw_move(destination_cell, undo = True)
+
+
+    def solve(self):
+        self.__solve_r(i = 0 , j = 0)
 
 def main():
     win = Window(800, 600)
@@ -241,7 +323,9 @@ def main():
 
     # cell_first.draw_move(cell_second, True)
 
-    maze = Maze(x1=100, y1=200, num_rows=3, num_cols=3, cell_size_x=50, cell_size_y=50, window=win)
+    maze = Maze(x1=100, y1=200, num_rows=5, num_cols=3, cell_size_x=50, cell_size_y=50, window=win)
+
+    maze.solve()
 
     win.wait_for_close()
 

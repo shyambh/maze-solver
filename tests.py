@@ -18,6 +18,17 @@ class Tests (unittest.TestCase):
             len(cells),
             num_rows
         )
+    
+    def test_cell_visit_reset(self):
+
+        num_cols = 12
+        num_rows = 10
+        m1 = Maze(0,0, num_rows, num_cols, 10, 10)
+        cells = m1.get_cells()
+        
+        for row in cells:
+            for col in row:
+                 self.assertTrue(col.visited is False, 'All the cell visited property should be reset to False')
 
 if __name__ == "__main__":
     unittest.main()
