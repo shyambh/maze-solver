@@ -11,12 +11,13 @@ class Window:
         self.window.title("Root Window Widget")
         self.window.protocol("WM_DELETE_WINDOW", self.close) 
 
-        self.canvas = Canvas(self.window, width = self.width, height = self.height)
+        self.canvas = Canvas(self.window, width = self.width, height = self.height, background="white")
         self.canvas.pack(expand=1)
 
     def redraw(self):
         self.window.update_idletasks()
         self.window.update()
+   
     
     def wait_for_close(self):
         self.window_is_running = True
@@ -42,7 +43,7 @@ class Line:
         self.point2 = point2
 
     def draw(self, canvas, fill_color):
-        canvas.create_line(self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill = fill_color, width = 2)
+        canvas.create_line(self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill = fill_color, width = 4)
         canvas.pack()
 
 class Cell:
@@ -75,22 +76,22 @@ class Cell:
             bottom_wall = Line(bottom_left_point, bottom_right_point)
 
             if self.has_left_wall:
-                self.__win.draw_line(left_wall, "red")
+                self.__win.draw_line(left_wall, "black")
             else:
                 self.__win.draw_line(left_wall, "white")
 
             if self.has_right_wall:
-                self.__win.draw_line(right_wall, "red")
+                self.__win.draw_line(right_wall, "black")
             else:
                 self.__win.draw_line(right_wall, "white")
 
             if self.has_top_wall:
-                self.__win.draw_line(top_wall, "red")
+                self.__win.draw_line(top_wall, "black")
             else:
                 self.__win.draw_line(top_wall, "white")
 
             if self.has_bottom_wall:
-                self.__win.draw_line(bottom_wall, "red")
+                self.__win.draw_line(bottom_wall, "black")
             else:
                 self.__win.draw_line(bottom_wall, "white")
     
@@ -103,9 +104,13 @@ class Cell:
         dest_cell_center_y = (to_cell.__y1_top_left + to_cell.__y2_bottom_right) / 2
         dest_cell_center_point = Point(dest_cell_center_x, dest_cell_center_y)
 
-        color = "red" if not undo else "gray"
+        color = "green" if not undo else "red"
 
         line = Line(self_center_point, dest_cell_center_point)
+
+        if undo:
+            time.sleep(0.1)
+
         line.draw(self.__win.canvas, color)
 
 class Maze:
@@ -160,7 +165,8 @@ class Maze:
     def __animate(self):
         if(self.__win):
             self.__win.redraw()
-            time.sleep(0.1)
+            
+            time.sleep(0.5 / (self.num_cols * self.num_rows))
 
     def __break_entrance_and_exit(self):
 
@@ -313,7 +319,7 @@ class Maze:
         self.__solve_r(i = 0 , j = 0)
 
 def main():
-    win = Window(800, 600)
+    win = Window(2048, 1200)
 
     # cell_first = Cell(100,200, 300, 400, win)
     # cell_second = Cell(300,400, 300, 400, win)
@@ -323,9 +329,15 @@ def main():
 
     # cell_first.draw_move(cell_second, True)
 
-    maze = Maze(x1=100, y1=200, num_rows=5, num_cols=3, cell_size_x=50, cell_size_y=50, window=win)
+    maze1 = Maze(x1=100, y1=200, num_rows=3, num_cols=3, cell_size_x=50, cell_size_y=50, window=win)
 
-    maze.solve()
+    maze2 = Maze(x1=400, y1=200, num_rows=7, num_cols=7, cell_size_x=50, cell_size_y=50, window=win)
+
+    maze3 = Maze(x1=900, y1=200, num_rows=12, num_cols=12, cell_size_x=30, cell_size_y=30, window=win)
+
+    maze1.solve()
+    maze2.solve()
+    maze3.solve()
 
     win.wait_for_close()
 
